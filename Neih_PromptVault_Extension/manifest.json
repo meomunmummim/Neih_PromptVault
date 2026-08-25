@@ -5,6 +5,7 @@
   "description": "Manage, group, and fill dynamic variable prompts quickly with search and auto-fill.",
   "permissions": [
     "storage",
+    "unlimitedStorage",
     "activeTab",
     "scripting"
   ],

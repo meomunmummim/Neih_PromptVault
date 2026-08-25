@@ -44,7 +44,7 @@ function setupEventListeners() {
 
 // --- Storage Handlers ---
 async function loadState() {
-  const result = await chrome.storage.sync.get(['groups', 'prompts']);
+  const result = await chrome.storage.local.get(['groups', 'prompts']);
   appState.groups = result.groups || ['Learn New Word', 'AI', 'Chinese'];
   appState.prompts = result.prompts || [
     {
@@ -57,7 +57,7 @@ async function loadState() {
 }
 
 async function saveState() {
-  await chrome.storage.sync.set(appState);
+  await chrome.storage.local.set(appState);
 }
 
 function showToast(msg) {
