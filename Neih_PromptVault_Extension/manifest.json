@@ -1,0 +1,32 @@
+﻿{
+  "manifest_version": 3,
+  "name": "Neih: Prompt Vault",
+  "version": "1.0.0",
+  "description": "Manage, group, and fill dynamic variable prompts quickly with search and auto-fill.",
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/prompt_icon.png",
+      "32": "images/prompt_icon.png",
+      "48": "images/prompt_icon.png",
+      "128": "images/prompt_icon.png"
+    }
+  },
+  "icons": {
+    "16": "images/prompt_icon.png",
+    "48": "images/prompt_icon.png",
+    "128": "images/prompt_icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

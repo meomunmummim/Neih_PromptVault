@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prompt Vault</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 380px;
+      height: 520px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header & Controls */
+    .header {
+      padding: 12px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .search-bar {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+    .search-bar:focus { border-color: #3b82f6; }
+    .action-btns { 
+      display: flex; 
+      gap: 6px; 
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      padding: 6px 8px;
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: background 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-danger { background: #ef4444; color: #fff; }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    /* Group Styles */
+    .group-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .group-card.drag-over { border: 2px dashed #2563eb; background: #eff6ff; }
+    .group-header {
+      padding: 10px 12px;
+      background: #f1f5f9;
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn-del-group {
+      background: transparent;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .btn-del-group:hover { opacity: 1; }
+    .group-body { display: flex; flex-direction: column; gap: 6px; padding: 8px; }
+    .group-body.collapsed { display: none; }
+
+    /* Prompt Item */
+    .prompt-item {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: grab;
+      user-select: none;
+    }
+    .prompt-item:hover { border-color: #94a3b8; }
+    .prompt-title { font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 2px; }
+    .prompt-preview { font-size: 11px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .prompt-actions { display: flex; gap: 6px; margin-top: 6px; }
+    .btn-mini { padding: 3px 6px; font-size: 10px; border-radius: 4px; border: none; cursor: pointer; }
+
+    /* Fill Form / Overlay Modal */
+    .modal {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ffffff;
+      z-index: 10;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+    .hidden { display: none !important; }
+    .field-label { font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px; }
+    .input-field {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+    }
+    textarea.input-field { min-height: 80px; resize: vertical; }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <input type="text" id="searchInput" class="search-bar" placeholder="Search prompts or groups...">
+    <div class="action-btns">
+      <button id="btnNewPrompt" class="btn btn-primary">+ Prompt</button>
+      <button id="btnNewGroup" class="btn btn-secondary">+ Group</button>
+      <button id="btnExportCsv" class="btn btn-secondary" title="Export to CSV/Excel">📥 Export</button>
+      <button id="btnImportCsv" class="btn btn-secondary" title="Import from CSV/Excel">📤 Import</button>
+      <button id="btnDeleteAll" class="btn btn-danger" title="Delete Everything">🗑️ Delete All</button>
+      <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+    </div>
+  </div>
+
+  <div id="contentArea" class="content-area"></div>
+
+  <!-- Modal for Creating/Editing Prompts -->
+  <div id="editorModal" class="modal hidden">
+    <h3 id="modalTitle" style="font-size: 14px;">Create Prompt</h3>
+    <div>
+      <div class="field-label">TOPIC / TITLE</div>
+      <input type="text" id="editTitle" class="input-field" placeholder="e.g. Write Anki Example">
+    </div>
+    <div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="field-label">CONTENT</div>
+        <button id="btnAddVar" class="btn-mini btn-secondary" style="margin-bottom: 2px;">+ var</button>
+      </div>
+      <textarea id="editContent" class="input-field" placeholder="Write {{count}} examples for the word: {{newword}}"></textarea>
+    </div>
+    <div>
+      <div class="field-label">ASSIGN GROUP</div>
+      <select id="editGroupSelect" class="input-field"></select>
+    </div>
+    <div style="display: flex; gap: 8px; margin-top: auto;">
+      <button id="btnSavePrompt" class="btn btn-primary">Save</button>
+      <button id="btnCancelEdit" class="btn btn-secondary">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Modal for Filling Variables and Copying -->
+  <div id="fillModal" class="modal hidden">
+    <h3 id="fillTitle" style="font-size: 14px;">Use Prompt</h3>
+    <p id="fillPreview" style="font-size: 11px; color: #64748b; background: #f1f5f9; padding: 6px; border-radius: 4px;"></p>
+    <div id="varsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+    <div style="display: flex; gap: 6px; margin-top: auto;">
+      <button id="btnCopyResult" class="btn btn-primary">📋 Copy</button>
+      <button id="btnInsertResult" class="btn btn-secondary">⚡ Insert Page</button>
+      <button id="btnCancelFill" class="btn btn-secondary">Back</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Copied to clipboard!</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
