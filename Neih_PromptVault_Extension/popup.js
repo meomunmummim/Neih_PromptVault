@@ -34,10 +34,7 @@ function setupEventListeners() {
   document.getElementById('btnCancelFill').onclick = () => fillModal.classList.add('hidden');
   document.getElementById('btnCopyResult').onclick = handleCopy;
   document.getElementById('btnInsertResult').onclick = handleInsert;
-<<<<<<< HEAD
-=======
   document.getElementById('btnDeleteAll').onclick = deleteAllData;
->>>>>>> branch
   searchInput.oninput = render;
 
   // CSV Export & Import Handlers
@@ -49,21 +46,9 @@ function setupEventListeners() {
 // --- Storage Handlers ---
 async function loadState() {
   const result = await chrome.storage.local.get(['groups', 'prompts']);
-<<<<<<< HEAD
-  appState.groups = result.groups || ['Learn New Word', 'AI', 'Chinese'];
-  appState.prompts = result.prompts || [
-    {
-      id: '1',
-      title: 'Write Anki Example',
-      content: 'Write 3 example sentences in Anki cloze format for the word: {{newword}}',
-      group: 'Learn New Word'
-    }
-  ];
-=======
   // Change: Start with empty lists [] instead of default names
   appState.groups = result.groups || [];
   appState.prompts = result.prompts || [];
->>>>>>> branch
 }
 
 async function saveState() {
@@ -99,11 +84,7 @@ function render() {
   });
 
   // Render Groups
-<<<<<<< HEAD
-  appState.groups.forEach(groupName => {
-=======
   appState.groups.forEach((groupName, index) => {
->>>>>>> branch
     const prompts = grouped[groupName] || [];
     if (filter && prompts.length === 0) return;
 
@@ -125,11 +106,8 @@ function render() {
       <div class="group-header">
         <span>📂 ${escapeHtml(groupName)} (${prompts.length})</span>
         <div style="display: flex; gap: 6px; align-items: center;">
-<<<<<<< HEAD
-=======
           <button class="btn-mini btn-secondary btn-move-up" title="Move Up">↑</button>
           <button class="btn-mini btn-secondary btn-move-down" title="Move Down">↓</button>
->>>>>>> branch
           <button class="btn-mini btn-secondary btn-del-group" style="color:#ef4444; padding: 2px 6px;" title="Delete Group">🗑️</button>
           <span>▼</span>
         </div>
@@ -140,8 +118,6 @@ function render() {
     const header = groupEl.querySelector('.group-header');
     const body = groupEl.querySelector('.group-body');
     const delBtn = groupEl.querySelector('.btn-del-group');
-<<<<<<< HEAD
-=======
     const btnUp = groupEl.querySelector('.btn-move-up');
     const btnDown = groupEl.querySelector('.btn-move-down');
 
@@ -158,7 +134,6 @@ function render() {
       };
     }
 
->>>>>>> branch
 
     // Safe collapse toggle handler
     if (header && body) {
@@ -254,8 +229,6 @@ async function movePromptToGroup(promptId, targetGroup) {
   }
 }
 
-<<<<<<< HEAD
-=======
 async function moveGroupPosition(index, direction) {
   const newIndex = index + direction;
   
@@ -270,7 +243,6 @@ async function moveGroupPosition(index, direction) {
     render();
   }
 }
->>>>>>> branch
 // --- Prompt Editor Modal ---
 function openEditor(prompt = null) {
   editingPromptId = prompt ? prompt.id : null;
@@ -402,9 +374,6 @@ async function handleInsert() {
     });
   }
 }
-<<<<<<< HEAD
-
-=======
 async function deleteAllData() {
   if (confirm("Are you sure? This will delete ALL groups and prompts!")) {
     appState.groups = [];
@@ -414,7 +383,6 @@ async function deleteAllData() {
     showToast("Everything deleted!");
   }
 }
->>>>>>> branch
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
